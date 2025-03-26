@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 import pytz
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo  # Python 3.9+
+from datetime import datetime
+import datetime
 # OR (for older Python versions)
 # from pytz import timezone
 
@@ -22,6 +22,38 @@ class Subscription(BaseModel):
             return value
         else:
             raise ValueError(f"{value} is not a valid timezone!")
+     
+    
+    @field_validator("end_date")
+    @classmethod
+    def validate_start_end(cls, value: int, values):
+        
+        start_date = values.data.get("start_date")
+        if start_date is None:
+            raise ValueError("Start date must be provided before end date.")
+
+        if value - start_date < 259200:  # 3 days in seconds
+            raise ValueError("End date must be at least 3 days after the start date.")
+
+        return value
+        
+    @field_validator("start_date","end_date")
+    def validate_timestamp(cls, value: int):
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError("Timestamp must be a positive integer.")
+
+    
+        dt = datetime.datetime.utcfromtimestamp(value)
+
+        min_date = datetime.datetime(1970, 1, 1)
+    
+
+        if not (min_date <= dt):
+            raise ValueError("Timestamp is out of the valid range.")
+        
+        return value  # Return the validated value
+    
+   
     class Config:
         json_schema_extra = {
             "example": {
