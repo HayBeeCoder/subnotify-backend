@@ -1,20 +1,20 @@
 # from fastapi import HTTPException, status
 from sqlalchemy.orm.session import Session
 
-from models.subscription import DbSubscription
-from schemas import subscription
+from db.models import DbSubscription
+
 # from schemas import UserBase
 
 
-def create(db: Session, request: DbSubscription):
-    
-    new_subscription = subscription(
+def create(request: DbSubscription, db: Session):
+
+    new_subscription = DbSubscription(
         description=request.description,
         provider=request.provider,
         type=request.type,
-        start_date= request.start_date,
+        start_date=request.start_date,
         end_date=request.end_date,
-        user_timezone=request.user_timezone
+        user_timezone=request.user_timezone,
     )
     db.add(new_subscription)
     db.commit()
