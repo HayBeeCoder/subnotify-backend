@@ -6,26 +6,22 @@ from sqlalchemy.orm.session import Session
 
 router = APIRouter(prefix="/subscription", tags=["subscription"])
 
-# @router.get("/")
-# def get_all() -> list[Subscription]:
-#     return service.get_all()
+@router.get("/")
+def getAllService()-> list[Subscription]:
+    return service.get_all()
 
-
-# @router.get("/{name}")
-# def get_one(name: str) -> Subscription:
-#     return service.get_one(name)
+@router.get("/{service_provider_or_type}")
+def getService(service_provider_or_type: str) -> Subscription:
+    return service.get_one(service_provider_or_type)
 
 @router.post("/")
 def create(subscription: Subscription, db: Session = Depends(get_db)) -> Subscription:
     return service.create(subscription,db)
 
 
-# @router.patch("/")
-# def modify(subscription: Subscription) -> Subscription:
-#     return service.modify(subscription)
+@router.delete("/{service_id}")
+def delete(id: str):
+    return service.delete(id)
 
-# @router.delete("/{name}")
-# def delete(name: str):
-#     return service.delete(name)
 
 
