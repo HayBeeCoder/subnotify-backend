@@ -1,4 +1,5 @@
 # from fastapi import HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy.orm.session import Session
 
 from db.models import DbSubscription
@@ -7,21 +8,32 @@ from db.models import DbSubscription
 
 
 def create(request: DbSubscription, db: Session):
+    try: 
+        existing_subscription = db.query(DbSubscription).filter_by(
+            provider=request.provider, type=request.type
+        ).first()
+        
+        if existing_subscription:
+            raise ValueError("Subscription with the same provider and type already exists!")
 
-    new_subscription = DbSubscription(
-        description=request.description,
-        provider=request.provider,
-        type=request.type,
-        start_date=request.start_date,
-        end_date=request.end_date,
-        user_timezone=request.user_timezone,
-    )
-    db.add(new_subscription)
-    db.commit()
-    db.refresh(new_subscription)
-    return new_subscription
+        new_subscription = DbSubscription(
+            description=request.description,
+            provider=request.provider,
+            type=request.type,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            user_timezone=request.user_timezone,
+        )
+        db.add(new_subscription)
+        db.commit()
+        db.refresh(new_subscription)
+        return new_subscription
+    
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred: " + str(e))
 
- 
 
 def get_all(db: Session):
     return db.query(DbSubscription).all()
@@ -59,5 +71,3 @@ def get_all(db: Session):
 #         db.commit()
 #         return "user successfully deleted!"
 #     return "user not found"
-   
-    
