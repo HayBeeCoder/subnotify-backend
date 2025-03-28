@@ -1,4 +1,4 @@
-from fastapi import Depends, Header
+from fastapi import Depends
 
 from sqlalchemy.orm.session import Session
 
@@ -12,8 +12,8 @@ def get_all(db: Session) -> list[Subscription]:
 def get_one(service_provider_or_type: str, db: Session) -> Subscription:
     return data.get_one(service_provider_or_type, db)
 
-def create(subscription: Subscription, authorization: str  = Header(None)) -> Subscription:
-    return data.create( subscription, authorization)
+def create(subscription: Subscription, db: Session ) -> Subscription:
+    return data.create( subscription, db)
 
 def modify(subscription: Subscription, db: Session) -> Subscription:
     return data.modify(subscription, db)
