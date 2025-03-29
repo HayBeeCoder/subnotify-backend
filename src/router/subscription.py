@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Header
 from data.init import get_db
-from schemas.subscription import Subscription, SubscriptionsResponse
+from schemas.subscription import CreateSubscriptionResponse, Subscription, SubscriptionsResponse
 import service.subscription as service
 from sqlalchemy.orm.session import Session
 
@@ -16,7 +16,7 @@ def getService(service_provider_or_type: str, db: Session = Depends(get_db)) -> 
     return service.get_one(service_provider_or_type,db)
 
 @router.post("/")
-def create(subscription: Subscription, authorization: str = Header(None)) -> Subscription:
+def create(subscription: Subscription, authorization: str = Header(None)) -> CreateSubscriptionResponse:
     return service.create(subscription,authorization)
 
 

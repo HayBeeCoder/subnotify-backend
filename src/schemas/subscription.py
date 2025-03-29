@@ -77,3 +77,10 @@ class SubscriptionsResponse(BaseModel):
     
     class Config:
         from_attributes = True
+        
+class CreateSubscriptionResponse(BaseModel):
+    data: str
+    
+    
+    class Config:
+        from_attributes = True
