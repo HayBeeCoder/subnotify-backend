@@ -7,14 +7,14 @@ import datetime
 # from pytz import timezone
 
 class Subscription(BaseModel):
-    provider: str
-    type: str
+    provider: str = Field(..., min_length=1, description="Subscription provider cannot be empty")
+    type: str = Field(..., min_length=1, description="Subscription type cannot be empty")
     description: Optional[str] = Field(
         default=None, title="The description of the service subscribed to.",
     )
-    start_date: int  # Unix timestamp in seconds
-    end_date: int    # Unix timestamp in seconds
-    user_timezone: str  # User's time zone, e.g., "America/New_York"
+    start_date: int  = Field(..., gt=0, description="Start date must be a positive integer (timestamp)")
+    end_date: int    = Field(..., gt=0, description="End date must be a positive integer (timestamp)")
+    user_timezone: str  = Field(..., min_length=1, description="User timezone field cannot be empty")
     
     @field_validator("user_timezone")
     def ensure_valid_user_timezone(cls, value: str):
