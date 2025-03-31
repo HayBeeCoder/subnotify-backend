@@ -27,6 +27,11 @@ def create(request: DbSubscription, authorization: str = Header(None)):
         "user_id": user.id  
     }
     
+    existingSubscription = supabase.table("subscriptions").select("*").eq("provider", response_data["provider"]).eq("type", response_data["type"]).execute()
+    if existingSubscription.data:
+        raise HTTPException(status_code=400, detail="A subscription with this provider and type already exists.")
+
+    
     try:
         
         result = supabase.table("subscriptions").insert(response_data).execute()
