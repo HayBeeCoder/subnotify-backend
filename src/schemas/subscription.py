@@ -71,15 +71,17 @@ class SubscriptionsResponse(BaseModel):
     provider: str
     type: str
     description: str
-    start_date: str
-    end_date: str
+    start_date: int
+    end_date: int
     user_timezone: str
     
     class Config:
         from_attributes = True
         
 class CreateSubscriptionResponse(BaseModel):
-    data: str
+    message: str
+    subscription_id: int
+    data: SubscriptionsResponse
     
     
     class Config:
