@@ -1,73 +1,43 @@
-# from fastapi import HTTPException, status
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Header
 from sqlalchemy.orm.session import Session
+from auth.auth import get_current_user
+
 
 from db.models import DbSubscription
 
-# from schemas import UserBase
+def create(request: DbSubscription, authorization: str = Header(None)):
+   
 
-
-def create(request: DbSubscription, db: Session):
-    try: 
-        existing_subscription = db.query(DbSubscription).filter_by(
-            provider=request.provider, type=request.type
-        ).first()
-        
-        if existing_subscription:
-            raise ValueError("Subscription with the same provider and type already exists!")
-
-        new_subscription = DbSubscription(
-            description=request.description,
-            provider=request.provider,
-            type=request.type,
-            start_date=request.start_date,
-            end_date=request.end_date,
-            user_timezone=request.user_timezone,
-        )
-        db.add(new_subscription)
-        db.commit()
-        db.refresh(new_subscription)
-        return new_subscription
+    from main import supabase
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization token is required")
     
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+
+    user = get_current_user(supabase, authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid authorization token")
+   
+    response_data = {
+        "provider": request.provider,
+        "type": request.type,
+        "description": request.description,
+        "start_date": request.start_date,
+        "end_date": request.end_date,
+        "user_timezone": request.user_timezone,
+        "user_id": user.id  
+    }
+    
+    try:
+        
+        result = supabase.table("subscriptions").insert(response_data).execute()
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred: " + str(e))
+        raise HTTPException(status_code=500, detail=f"Database insertion failed: {str(e)}")
 
+    
+    
 
-def get_all(db: Session):
-    return db.query(DbSubscription).all()
-
-
-# def get_subscription(db: Session, service_provider_or_type: str):
-#     user = db.query(DbSubscription).filter(DbSubscription.provider == service_provider_or_type).first()
-#     if not user:
-#         user = db.query
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_404_NOT_FOUND,
-#             detail=f"Article with id {id} not found",
-#         )
-#     return user
-
-
-# def update_user(db: Session, id: int, request: UserBase):
-#     user = db.query(DbUser).filter(DbUser.id == id)
-#     user.update(
-#         {
-#             DbUser.username: request.username,
-#             DbUser.email: request.email,
-#             DbUser.password: Hash.bcrypt(request.password),
-#         }
-#     )
-#     db.commit()
-#     return "ok"
-
-
-# def delete_user(db: Session, id: int):
-#     user = db.query(DbUser).filter(DbUser.id == id).first()
-#     if user:
-#         db.delete(user)
-#         db.commit()
-#         return "user successfully deleted!"
-#     return "user not found"
+    return {
+        "message": "Subscription created successfully!",
+        "subscription_id": result.data[0]["id"],  # Return the new subscription ID
+        "data": result.data[0]
+    }
