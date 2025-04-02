@@ -54,6 +54,8 @@ cover/
 # Translations
 *.mo
 *.pot
+src/*.db
+src/subnotify.db
 
 # Django stuff:
 *.log
@@ -167,3 +169,6 @@ cython_debug/
 .vscode/settings.json
 
 .env
+.db
+src/subnotify.db
+todo.md
