@@ -74,6 +74,8 @@ class SubscriptionsResponse(BaseModel):
     start_date: int
     end_date: int
     user_timezone: str
+    duration: Optional[int] = 0
+    id: int
     
     class Config:
         from_attributes = True
@@ -86,3 +88,7 @@ class CreateSubscriptionResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class GetAllSubscriptionsResponse(BaseModel):
+    data: list[SubscriptionsResponse]
