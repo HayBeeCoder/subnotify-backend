@@ -171,4 +171,5 @@ cython_debug/
 .env
 .db
 src/subnotify.db
-todo.md
+todos.md
+subnotify.db
