@@ -14,11 +14,11 @@ def get_all(
     from main import supabase
 
     query = supabase.table("subscriptions").select("id,*")
-    # .order('created_at', desc=True).execute()
+
     query = apply_query_et_sort(query, q, sort)
     try:
 
-        result = query.execute()
+        result = query.eq("user_id", user.id) .execute()
         return {"data": result.data}
     except Exception as e:
         raise HTTPException(
@@ -81,13 +81,38 @@ def modify(subscription_id: int, user: User, request: DbSubscription):
     }
 
     try:
-        result = supabase.table("subscriptions").update(updated_data).eq("id", subscription_id).execute()
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Database insertion failed: {str(e)}"
-        )
-
-    return {
+        result = supabase.table("subscriptions").update(updated_data).eq("id", subscription_id).eq("user_id", user.id).execute()
+        return {
         "message": "Subscription updated successfully!",
         "data": result.data[0],
     }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Database Update failed: {str(e)}"
+        )
+
+   
+
+def delete(subscription_id: int, user: User):
+    from main import supabase
+    
+    existing_subscription = (
+        supabase.table("subscriptions")
+        .select("id")  
+        .eq("id", subscription_id)
+        .eq("user_id", user.id)  
+        .execute()
+    )
+    
+    if not existing_subscription.data:
+        raise HTTPException(status_code=404, detail="Subscription not found or unauthorized")
+    try: 
+        supabase.table("subscriptions").delete().eq("id", subscription_id).eq("user_id", user.id).execute()
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Database Deletion failed: {str(e)}"
+        )
+
+    return {"message": "Subscription deleted successfully!"}
