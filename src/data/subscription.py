@@ -66,3 +66,28 @@ def create(user: User, request: DbSubscription):
         "subscription_id": result.data[0]["id"],  # Return the new subscription ID
         "data": result.data[0],
     }
+
+def modify(subscription_id: int, user: User, request: DbSubscription):
+    from main import supabase
+    updated_data = {
+        "provider": request.provider,
+        "type": request.type,
+        "description": request.description,
+        "start_date": request.start_date,
+        "end_date": request.end_date,
+        "user_timezone": request.user_timezone,
+        "duration": calculate_duration_in_days(request.start_date, request.end_date),
+        "user_id": user.id,
+    }
+
+    try:
+        result = supabase.table("subscriptions").update(updated_data).eq("id", subscription_id).execute()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Database insertion failed: {str(e)}"
+        )
+
+    return {
+        "message": "Subscription updated successfully!",
+        "data": result.data[0],
+    }
