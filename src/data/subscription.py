@@ -3,7 +3,7 @@ from typing import Optional
 from gotrue.types import User
 from db.models import DbSubscription
 from utils.helpers.calculate_durations_in_days import calculate_duration_in_days
-from .helper import apply_query_et_sort
+from .helper import add_to_due_register, apply_query_et_sort, get_subscriptions_register
 
 
 def get_all(
@@ -56,16 +56,19 @@ def create(user: User, request: DbSubscription):
     try:
 
         result = supabase.table("subscriptions").insert(response_data).execute()
+        
+        add_to_due_register(result.data[0]["id"], user.id, result.data[0]["end_date"], supabase)
+        print(get_subscriptions_register(supabase))
+        return {
+            "message": "Subscription created successfully!",
+            "subscription_id": result.data[0]["id"],  # Return the new subscription ID
+            "data": result.data[0],
+        }
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Database insertion failed: {str(e)}"
         )
 
-    return {
-        "message": "Subscription created successfully!",
-        "subscription_id": result.data[0]["id"],  # Return the new subscription ID
-        "data": result.data[0],
-    }
 
 def modify(subscription_id: int, user: User, request: DbSubscription):
     from main import supabase
