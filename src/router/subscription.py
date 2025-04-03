@@ -5,6 +5,7 @@ from data.init import get_db
 from user import get_current_user
 from schemas.subscription import (
     CreateSubscriptionResponse,
+    DeleteSubscriptionResponse,
     GetAllSubscriptionsResponse,
     Subscription,
     SubscriptionsResponse,
@@ -60,6 +61,6 @@ def modify(
 
 #   "end_date": 1714502400,
 
-@router.delete("/{service_id}")
-def delete(service_id: str, db: Session = Depends(get_db)) -> Subscription:
-    return service.delete(service_id, db)
+@router.delete("/{subscription_id}")
+def delete(subscription_id: int, user: dict = Depends(get_authenticated_user)) -> DeleteSubscriptionResponse :
+    return service.delete(subscription_id, user)
