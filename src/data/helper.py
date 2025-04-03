@@ -53,7 +53,7 @@ def get_subscriptions_due_on(date: str, supabase: Client):
     return due_dates.get(date, [])  # Return list of subscriptions for that date
 
 
-def get_subscriptions(supabase: Client):
+def get_subscriptions_register(supabase: Client):
 
     result = supabase.table("subscription_due_dates").select("due_dates").single().execute()
     
