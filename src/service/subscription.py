@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import Session
 
 from schemas.subscription import (
     CreateSubscriptionResponse,
+    DeleteSubscriptionResponse,
     GetAllSubscriptionsResponse,
     Subscription,
     UpdateSubscriptionResponse,
@@ -35,5 +36,5 @@ def modify(subscription_id: int, subscription: Subscription, user: User) -> Upda
     return data.modify(subscription_id, user,subscription)
 
 
-def delete(service_id: str, db: Session) -> Subscription:
-    return data.delete(service_id, db)
+def delete(subscription_id: int, user: User) -> DeleteSubscriptionResponse:
+    return data.delete(subscription_id, user)
