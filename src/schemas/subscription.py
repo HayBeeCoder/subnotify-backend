@@ -98,3 +98,5 @@ class UpdateSubscriptionResponse(BaseModel):
     message: str
     data: SubscriptionsResponse
     
+class DeleteSubscriptionResponse(BaseModel):
+    message: str
