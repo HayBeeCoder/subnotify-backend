@@ -1,46 +1,21 @@
+from fastapi import HTTPException
 from typing import Optional
-from fastapi import HTTPException, Header
-from supabase import AuthApiError
-from auth.auth import get_current_user
-
-
+from gotrue.types import User
 from db.models import DbSubscription
 from utils.helpers.calculate_durations_in_days import calculate_duration_in_days
+from .helper import apply_query_et_sort
 
 
 def get_all(
-    authorization: str = Header(None),
+    user: User,
     q: Optional[str] = None,
     sort: Optional[str] = None,
 ):
     from main import supabase
 
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization token is required")
-
-    user = get_current_user(supabase, authorization)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid authorization token")
-
     query = supabase.table("subscriptions").select("id,*")
     # .order('created_at', desc=True).execute()
-    if q:
-        query = query.or_(f"provider.ilike.%{q}%,type.ilike.%{q}%")
-
-    if sort:
-        if sort == "az":
-            query = query.order("provider", desc=False)  # A-Z
-        elif sort == "za":
-            query = query.order("provider", desc=True)  # Z-A
-        elif sort == "new":
-            query = query.order("created_at", desc=True)  # Newest First
-        elif sort == "old":
-            query = query.order("created_at", desc=False)  # Oldest First
-        elif sort == "short":
-            query = query.order("duration", desc=False)  # Shortest Duration First
-        elif sort == "long":
-            query = query.order("duration", desc=True)  # Longest Duration First
-
+    query = apply_query_et_sort(query, q, sort)
     try:
 
         result = query.execute()
@@ -49,18 +24,10 @@ def get_all(
         raise HTTPException(
             status_code=500, detail=f"Database insertion failed: {str(e)}"
         )
-    
 
-def create(request: DbSubscription, authorization: str = Header(None)):
 
+def create(user: User, request: DbSubscription):
     from main import supabase
-
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization token is required")
-
-    user = get_current_user(supabase, authorization)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid authorization token")
 
     response_data = {
         "provider": request.provider,

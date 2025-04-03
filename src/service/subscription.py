@@ -1,5 +1,6 @@
 from typing import Optional
 from fastapi import Depends, Header
+from gotrue.types import User
 
 from sqlalchemy.orm.session import Session
 
@@ -12,11 +13,11 @@ import data.subscription as data
 
 
 def get_all(
-    authorization: str = Header(None),
+    user: User,
     q: Optional[str] = None,
     sort: Optional[str] = None,
 ) -> GetAllSubscriptionsResponse:
-    return data.get_all(authorization,q, sort)
+    return data.get_all(user,q, sort)
 
 
 def get_one(service_provider_or_type: str, db: Session) -> Subscription:
@@ -24,9 +25,9 @@ def get_one(service_provider_or_type: str, db: Session) -> Subscription:
 
 
 def create(
-    subscription: Subscription, authorization: str = Header(None)
+    subscription: Subscription, user: User
 ) -> CreateSubscriptionResponse:
-    return data.create(subscription, authorization)
+    return data.create(user, subscription)
 
 
 def modify(subscription: Subscription, db: Session) -> Subscription:
