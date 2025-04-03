@@ -1,6 +1,7 @@
 
 def apply_query_et_sort(query, q, sort):
-    
+    if not q and not sort:
+        query.order('created_at', desc=True)
   
     if q:
         query = query.or_(f"provider.ilike.%{q}%,type.ilike.%{q}%")
