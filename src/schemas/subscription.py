@@ -92,3 +92,9 @@ class CreateSubscriptionResponse(BaseModel):
 
 class GetAllSubscriptionsResponse(BaseModel):
     data: list[SubscriptionsResponse]
+    
+    
+class UpdateSubscriptionResponse(BaseModel):
+    message: str
+    data: SubscriptionsResponse
+    
