@@ -8,6 +8,7 @@ from schemas.subscription import (
     CreateSubscriptionResponse,
     GetAllSubscriptionsResponse,
     Subscription,
+    UpdateSubscriptionResponse,
 )
 import data.subscription as data
 
@@ -30,8 +31,8 @@ def create(
     return data.create(user, subscription)
 
 
-def modify(subscription: Subscription, db: Session) -> Subscription:
-    return data.modify(subscription, db)
+def modify(subscription_id: int, subscription: Subscription, user: User) -> UpdateSubscriptionResponse:
+    return data.modify(subscription_id, user,subscription)
 
 
 def delete(service_id: str, db: Session) -> Subscription:
