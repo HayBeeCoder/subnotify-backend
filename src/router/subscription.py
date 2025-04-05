@@ -8,11 +8,9 @@ from schemas.subscription import (
     DeleteSubscriptionResponse,
     GetAllSubscriptionsResponse,
     Subscription,
-    SubscriptionsResponse,
     UpdateSubscriptionResponse,
 )
 import service.subscription as service
-from sqlalchemy.orm.session import Session
 
 
 router = APIRouter(
@@ -22,9 +20,8 @@ router = APIRouter(
 )
 
 
-# @router.get("/subscriptions")
+
 @router.get("/all")
-# @router.get("/all/")
 def get_all(
     user: dict = Depends(get_authenticated_user),
     q: Optional[str] = Query(
