@@ -1,9 +1,10 @@
+
 from fastapi import HTTPException
 from typing import Optional
 from gotrue.types import User
-from db.models import DbSubscription
+from schemas.subscription import Subscription
 from utils.helpers.calculate_durations_in_days import calculate_duration_in_days
-from .helper import add_to_due_register, apply_query_et_sort, get_subscriptions_register
+from .helper import add_to_due_register, apply_query_et_sort, get_subscriptions_due_on, get_subscriptions_register, update_enddate
 
 
 def get_all(
@@ -26,7 +27,7 @@ def get_all(
         )
 
 
-def create(user: User, request: DbSubscription):
+def create(user: User, request: Subscription):
     from main import supabase
 
     response_data = {
@@ -70,7 +71,7 @@ def create(user: User, request: DbSubscription):
         )
 
 
-def modify(subscription_id: int, user: User, request: DbSubscription):
+def modify(subscription_id: int, user: User, request: Subscription):
     from main import supabase
     updated_data = {
         "provider": request.provider,
@@ -82,9 +83,20 @@ def modify(subscription_id: int, user: User, request: DbSubscription):
         "duration": calculate_duration_in_days(request.start_date, request.end_date),
         "user_id": user.id,
     }
+    
+    existing_subscription = supabase.table("subscriptions").select("end_date").eq("id", subscription_id).single().execute()  # Ensures only one record is returned
+    
+        
 
     try:
         result = supabase.table("subscriptions").update(updated_data).eq("id", subscription_id).eq("user_id", user.id).execute()
+        # print({"result": result.data , "existing": existing_subscription.data})
+        if existing_subscription.data:
+            # print({"existing": existing_subscription.data["end_date"], "result": result.data[0]["end_date"]})
+            if existing_subscription.data["end_date"] != result.data[0]["end_date"]:
+                update_enddate(result.data[0]["end_date"],existing_subscription.data["end_date"], supabase, subscription_id)
+                
+        # print(get_subscriptions_register(supabase))
         return {
         "message": "Subscription updated successfully!",
         "data": result.data[0],
