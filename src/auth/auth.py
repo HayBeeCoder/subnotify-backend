@@ -1,5 +1,5 @@
 from fastapi import HTTPException, Header,status
-from supabase import AuthApiError, SupabaseAuthClient
+from supabase import SupabaseAuthClient
 from gotrue.errors import AuthApiError
 
 
