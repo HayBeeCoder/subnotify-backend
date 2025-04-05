@@ -1,5 +1,6 @@
 from fastapi import HTTPException, Header,status
 from supabase import AuthApiError, SupabaseAuthClient
+from gotrue.errors import AuthApiError
 
 
 def get_current_user(supabase: SupabaseAuthClient, authorization: str = Header(None)):
