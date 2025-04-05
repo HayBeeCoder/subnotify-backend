@@ -15,6 +15,7 @@ from supabase import create_client, Client
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 scheduler = BackgroundScheduler()
@@ -47,5 +48,7 @@ app.add_middleware(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", reload=True)
+    port = int(os.environ.get("PORT", 8000))  # Fallback to 8000 locally
+    print(port)
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
     
