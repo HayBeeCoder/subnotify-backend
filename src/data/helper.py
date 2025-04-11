@@ -109,11 +109,11 @@ def update_enddate(
         due_dates[new_date_key].append(subscription_entry)
 
         # Update the record in the database
-    print({"id": result.data["id"]})
+
     update_result = (
             supabase.table("subscription_due_dates")
             .update({"due_dates": due_dates})
             .eq("id", result.data["id"])
             .execute()
         )
-    print({"message": "End date updated successfully", "due_dates": due_dates})
+    # print({"message": "End date updated successfully", "due_dates": due_dates})
