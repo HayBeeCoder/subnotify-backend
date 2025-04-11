@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from typing import Optional
 from gotrue.types import User
 from schemas.subscription import Subscription
+from utils.helpers.convertToUTC import convertToUTC
 from utils.helpers.calculate_durations_in_days import calculate_duration_in_days
 from .helper import add_to_due_register, apply_query_et_sort, get_subscriptions_due_on, get_subscriptions_register, update_enddate
 
@@ -39,6 +40,7 @@ def create(user: User, request: Subscription):
         "user_timezone": request.user_timezone,
         "duration": calculate_duration_in_days(request.start_date, request.end_date),
         "user_id": user.id,
+        "end_date_in_utc": convertToUTC(request.end_date,request.user_timezone)
     }
 
     existingSubscription = (
@@ -46,6 +48,7 @@ def create(user: User, request: Subscription):
         .select("*")
         .eq("provider", response_data["provider"])
         .eq("type", response_data["type"])
+        .eq("user_id", response_data["user_id"])
         .execute()
     )
     if existingSubscription.data:
@@ -58,8 +61,8 @@ def create(user: User, request: Subscription):
 
         result = supabase.table("subscriptions").insert(response_data).execute()
         
-        add_to_due_register(result.data[0]["id"], user.id, result.data[0]["end_date"], supabase)
-        print(get_subscriptions_register(supabase))
+        add_to_due_register(result.data[0]["id"], user.id, result.data[0]["end_date_in_utc"], supabase)
+        
         return {
             "message": "Subscription created successfully!",
             "subscription_id": result.data[0]["id"],  # Return the new subscription ID
