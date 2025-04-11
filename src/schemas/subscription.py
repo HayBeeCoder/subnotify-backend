@@ -60,9 +60,9 @@ class Subscription(BaseModel):
                 "provider": "Netflix",
                 "type": "Streaming",
                 "description": "Monthly subscription for Netflix Premium",
-                "start_date": 1711824000,  
-                "end_date": 1714502400,  
-                "user_timezone": "America/New_York"
+                "start_date": 1744329600,  
+                "end_date": 1744588800,  
+                "user_timezone": "Africa/Lagos"
             }
         }
         
@@ -76,6 +76,7 @@ class SubscriptionsResponse(BaseModel):
     user_timezone: str
     duration: Optional[int] = 0
     id: int
+    end_date_in_utc: int
     
     class Config:
         from_attributes = True
