@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, Query, Request
+from slowapi import Limiter
 from auth.auth import get_authenticated_user
 
 from user import get_current_user
@@ -11,6 +12,7 @@ from schemas.subscription import (
     UpdateSubscriptionResponse,
 )
 import service.subscription as service
+from utils.helpers.limiting_config import limiter
 
 
 router = APIRouter(
@@ -22,7 +24,9 @@ router = APIRouter(
 
 
 @router.get("/all")
+@limiter.limit("5/minute")
 def get_all(
+    request: Request,
     user: dict = Depends(get_authenticated_user),
     q: Optional[str] = Query(
         None, description="Search query for filtering subscriptions"
@@ -36,14 +40,18 @@ def get_all(
 
 
 @router.post("/")
+@limiter.limit("5/minute")
 def create(
+    request: Request,
     subscription: Subscription, user: dict = Depends(get_authenticated_user)
 ) -> CreateSubscriptionResponse:
     return service.create(subscription, user)
 
 
 @router.put("/{subscription_id}")
+@limiter.limit("5/minute")
 def modify(
+    request: Request,
     subscription_id: int,
     subscription: Subscription,
     user: dict = Depends(get_authenticated_user),
@@ -53,5 +61,6 @@ def modify(
 #   "end_date": 1714502400,
 
 @router.delete("/{subscription_id}")
-def delete(subscription_id: int, user: dict = Depends(get_authenticated_user)) -> DeleteSubscriptionResponse :
+@limiter.limit("5/minute")
+def delete(request: Request, subscription_id: int, user: dict = Depends(get_authenticated_user)) -> DeleteSubscriptionResponse :
     return service.delete(subscription_id, user)
