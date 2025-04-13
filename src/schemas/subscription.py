@@ -77,6 +77,7 @@ class SubscriptionsResponse(BaseModel):
     duration: Optional[int] = 0
     id: int
     end_date_in_utc: int
+    ended: bool
     
     class Config:
         from_attributes = True
