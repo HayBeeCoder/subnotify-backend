@@ -61,7 +61,7 @@ def create(user: User, request: Subscription):
 
         result = supabase.table("subscriptions").insert(response_data).execute()
         
-        add_to_due_register(result.data[0]["id"], user.id, result.data[0]["end_date_in_utc"], supabase)
+        add_to_due_register(result.data[0]["id"], user.id, result.data[0]["end_date_in_utc"],result.data[0]["provider"], result.data[0]["type"], supabase)
         
         return {
             "message": "Subscription created successfully!",

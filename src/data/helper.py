@@ -29,7 +29,7 @@ from gotrue.types import User
 
 
 def add_to_due_register(
-    subscription_id: int, user: User, end_date: str, supabase: Client
+    subscription_id: int, user: User, end_date: str,provider: str, type: str, supabase: Client
 ):
     user_id = user.id
     deadline = end_date - 86400  # deadline is 24hrs before the end_date
@@ -48,6 +48,8 @@ def add_to_due_register(
                 "user_id": user_id,
                 "email": user.user_metadata["email"],
                 "name": user.user_metadata["full_name"],
+                "provider": provider,
+                "type": type
             }
         )
     else:
@@ -57,6 +59,8 @@ def add_to_due_register(
                 "user_id": user_id,
                 "email": user.user_metadata["email"],
                 "name": user.user_metadata["full_name"],
+                "provider": provider,
+                "type": type
             }
         ]
 
