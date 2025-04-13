@@ -1,4 +1,4 @@
-import datetime
+
 import os
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,14 +7,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from router import subscription as subscriptionrouter
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from supabase import create_client, Client 
 
    
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import  _rate_limit_exceeded_handler
 
 from slowapi.errors import RateLimitExceeded
 
+from service.scheduler import scheduled_task
 from utils.helpers.limiting_config import limiter
 
 
@@ -24,21 +26,14 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-scheduler = BackgroundScheduler()
-
-def scheduled_task():
-    result = supabase.table("subscription_due_dates").select("due_dates").execute()
-    due_dates_register = result.data[0]['due_dates']
-    """This function runs at scheduled intervals."""
-    print(f"Task executed at: {datetime.datetime.now()}")
-    print({"data": due_dates_register})
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handles startup and shutdown events."""
     print("Starting scheduler...")
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(scheduled_task, "cron", hour=0, minute=0)
     scheduler.start()
-    scheduler.add_job(scheduled_task, IntervalTrigger(seconds=30), id="interval_task", replace_existing=True)
     yield
     print("Shutting down scheduler...")
     scheduler.shutdown()
